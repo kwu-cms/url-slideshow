@@ -131,6 +131,21 @@ index.html?urls=https://example.com,https://example2.com&displayTime=10&loop=tru
 
 このプロジェクトはGitHub Pagesでホスティングできます。
 
+### 自動デプロイ（推奨）
+
+GitHub Actionsを使用して自動デプロイが設定されています。`main`ブランチにpushするだけで、自動的にGitHub Pagesにデプロイされます。
+
+初回設定：
+1. リポジトリの設定（Settings）に移動
+2. 「Pages」セクションを開く
+3. 「Source」で「GitHub Actions」を選択
+4. 「Save」をクリック
+
+これで、`main`ブランチにpushするたびに自動的にデプロイされます。
+
+### 手動デプロイ
+
+GitHub Actionsを使わない場合：
 1. リポジトリの設定（Settings）に移動
 2. 「Pages」セクションを開く
 3. 「Source」で「Deploy from a branch」を選択
