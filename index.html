@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URLスライドショー</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>URLスライドショー</h1>
+        </header>
+
+        <div class="main-content">
+            <!-- 設定パネル -->
+            <div class="settings-panel">
+                <h2>設定</h2>
+                
+                <!-- URL入力フォーム -->
+                <div class="url-input-section">
+                    <label for="url-input">URLを追加</label>
+                    <div class="input-group">
+                        <input type="url" id="url-input" placeholder="https://example.com">
+                        <button id="add-url-btn" class="btn btn-primary">追加</button>
+                    </div>
+                </div>
+
+                <!-- 表示設定 -->
+                <div class="display-settings">
+                    <div class="setting-item">
+                        <label for="display-time">表示時間（秒）</label>
+                        <input type="number" id="display-time" min="1" value="5">
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="loop-checkbox" checked>
+                            ループ再生
+                        </label>
+                    </div>
+                </div>
+
+                <!-- URLリスト -->
+                <div class="url-list-section">
+                    <h3>URLリスト</h3>
+                    <div id="url-list" class="url-list">
+                        <p class="empty-message">URLがありません</p>
+                    </div>
+                </div>
+
+                <!-- データ管理 -->
+                <div class="data-management">
+                    <button id="export-btn" class="btn btn-secondary">エクスポート</button>
+                    <button id="import-btn" class="btn btn-secondary">インポート</button>
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                </div>
+            </div>
+
+            <!-- 表示エリア -->
+            <div class="display-area" id="display-area">
+                <div class="display-controls">
+                    <div class="progress-info">
+                        <span id="current-index">0</span> / <span id="total-urls">0</span>
+                    </div>
+                    <div class="control-buttons">
+                        <button id="start-btn" class="btn btn-success">開始</button>
+                        <button id="stop-btn" class="btn btn-danger" disabled>停止</button>
+                        <button id="fullscreen-btn" class="btn btn-secondary">フルスクリーン</button>
+                    </div>
+                </div>
+                <div class="iframe-container" id="iframe-container">
+                    <iframe id="content-frame" src="about:blank"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
