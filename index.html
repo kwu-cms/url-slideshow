@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URLスライドショー</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -70,6 +71,23 @@
                 </div>
                 <div class="iframe-container" id="iframe-container">
                     <iframe id="content-frame" src="about:blank"></iframe>
+                </div>
+                <!-- フルスクリーン時のオーバーレイUI -->
+                <div class="fullscreen-overlay" id="fullscreen-overlay">
+                    <div class="fullscreen-controls">
+                        <button id="fs-start-btn" class="fs-btn" title="開始">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button id="fs-stop-btn" class="fs-btn" disabled title="停止">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                        <button id="fs-exit-btn" class="fs-btn" title="フルスクリーン解除">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="fs-progress">
+                            <span id="fs-current-index">0</span> / <span id="fs-total-urls">0</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

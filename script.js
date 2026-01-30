@@ -25,7 +25,12 @@ const elements = {
     displayArea: document.getElementById('display-area'),
     exportBtn: document.getElementById('export-btn'),
     importBtn: document.getElementById('import-btn'),
-    importFile: document.getElementById('import-file')
+    importFile: document.getElementById('import-file'),
+    fsStartBtn: document.getElementById('fs-start-btn'),
+    fsStopBtn: document.getElementById('fs-stop-btn'),
+    fsExitBtn: document.getElementById('fs-exit-btn'),
+    fsCurrentIndex: document.getElementById('fs-current-index'),
+    fsTotalUrls: document.getElementById('fs-total-urls')
 };
 
 // URLリストの管理
@@ -106,6 +111,10 @@ function renderUrlList() {
 function updateDisplayInfo() {
     elements.currentIndex.textContent = state.currentIndex + 1;
     elements.totalUrls.textContent = state.urls.length;
+    if (elements.fsCurrentIndex && elements.fsTotalUrls) {
+        elements.fsCurrentIndex.textContent = state.currentIndex + 1;
+        elements.fsTotalUrls.textContent = state.urls.length;
+    }
 }
 
 // 表示制御
@@ -151,6 +160,8 @@ function start() {
 
     elements.startBtn.disabled = true;
     elements.stopBtn.disabled = false;
+    if (elements.fsStartBtn) elements.fsStartBtn.disabled = true;
+    if (elements.fsStopBtn) elements.fsStopBtn.disabled = false;
     elements.displayTime.disabled = true;
     elements.loopCheckbox.disabled = true;
 
@@ -178,6 +189,8 @@ function stop() {
 
     elements.startBtn.disabled = false;
     elements.stopBtn.disabled = true;
+    if (elements.fsStartBtn) elements.fsStartBtn.disabled = false;
+    if (elements.fsStopBtn) elements.fsStopBtn.disabled = true;
     elements.displayTime.disabled = false;
     elements.loopCheckbox.disabled = false;
 
@@ -337,6 +350,16 @@ elements.startBtn.addEventListener('click', start);
 elements.stopBtn.addEventListener('click', stop);
 
 elements.fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+if (elements.fsStartBtn) {
+    elements.fsStartBtn.addEventListener('click', start);
+}
+if (elements.fsStopBtn) {
+    elements.fsStopBtn.addEventListener('click', stop);
+}
+if (elements.fsExitBtn) {
+    elements.fsExitBtn.addEventListener('click', exitFullscreen);
+}
 
 elements.exportBtn.addEventListener('click', exportData);
 elements.importBtn.addEventListener('click', () => {

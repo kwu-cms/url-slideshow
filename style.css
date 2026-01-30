@@ -6,7 +6,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f5f5f5;
     min-height: 100vh;
     padding: 20px;
     color: #333;
@@ -20,12 +20,11 @@ body {
 header {
     text-align: center;
     margin-bottom: 30px;
-    color: white;
+    color: #333;
 }
 
 header h1 {
-    font-size: 2.5em;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    font-size: 2em;
 }
 
 .main-content {
@@ -37,16 +36,16 @@ header h1 {
 
 .settings-panel {
     background: white;
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    padding: 20px;
+    border: 1px solid #ddd;
     overflow-y: auto;
 }
 
 .settings-panel h2 {
     margin-bottom: 20px;
-    color: #667eea;
-    font-size: 1.5em;
+    color: #333;
+    font-size: 1.3em;
 }
 
 .url-input-section {
@@ -67,23 +66,22 @@ header h1 {
 
 .input-group input {
     flex: 1;
-    padding: 10px;
-    border: 2px solid #e0e0e0;
-    border-radius: 6px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     font-size: 14px;
-    transition: border-color 0.3s;
 }
 
 .input-group input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #666;
 }
 
 .display-settings {
     margin-bottom: 25px;
     padding: 15px;
-    background: #f8f9fa;
-    border-radius: 8px;
+    background: #f9f9f9;
+    border-radius: 4px;
 }
 
 .setting-item {
@@ -104,10 +102,10 @@ header h1 {
 
 .setting-item input[type="number"] {
     width: 100%;
-    padding: 8px;
+    padding: 6px;
     margin-top: 5px;
-    border: 2px solid #e0e0e0;
-    border-radius: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     font-size: 14px;
 }
 
@@ -124,8 +122,8 @@ header h1 {
 
 .url-list-section h3 {
     margin-bottom: 15px;
-    color: #667eea;
-    font-size: 1.2em;
+    color: #333;
+    font-size: 1.1em;
 }
 
 .url-list {
@@ -137,19 +135,19 @@ header h1 {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px;
-    margin-bottom: 8px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    transition: background 0.2s;
+    padding: 10px;
+    margin-bottom: 6px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
 }
 
 .url-item:hover {
-    background: #e9ecef;
+    background: #f0f0f0;
 }
 
 .url-item.active {
-    background: #667eea;
+    background: #333;
     color: white;
 }
 
@@ -167,42 +165,57 @@ header h1 {
 
 .btn {
     padding: 8px 16px;
-    border: none;
-    border-radius: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     font-size: 14px;
-    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s;
     white-space: nowrap;
+    background: white;
+    color: #333;
 }
 
 .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.btn:active {
-    transform: translateY(0);
+    background: #f0f0f0;
 }
 
 .btn-primary {
-    background: #667eea;
+    background: #333;
     color: white;
+    border-color: #333;
+}
+
+.btn-primary:hover {
+    background: #555;
 }
 
 .btn-secondary {
-    background: #6c757d;
+    background: #666;
     color: white;
+    border-color: #666;
+}
+
+.btn-secondary:hover {
+    background: #777;
 }
 
 .btn-success {
     background: #28a745;
     color: white;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background: #218838;
 }
 
 .btn-danger {
     background: #dc3545;
     color: white;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background: #c82333;
 }
 
 .btn-small {
@@ -235,9 +248,9 @@ header h1 {
 
 .display-area {
     background: white;
-    border-radius: 12px;
+    border-radius: 4px;
     padding: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid #ddd;
     display: flex;
     flex-direction: column;
 }
@@ -248,13 +261,13 @@ header h1 {
     align-items: center;
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 2px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .progress-info {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: #667eea;
+    font-size: 1.1em;
+    font-weight: 500;
+    color: #333;
 }
 
 .control-buttons {
@@ -264,10 +277,10 @@ header h1 {
 
 .iframe-container {
     flex: 1;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
     overflow: hidden;
-    background: #f8f9fa;
+    background: #f9f9f9;
 }
 
 #content-frame {
@@ -290,24 +303,64 @@ header h1 {
 }
 
 .fullscreen-mode .display-controls {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 15px;
-    border-radius: 8px;
-    z-index: 10000;
-}
-
-.fullscreen-mode .progress-info {
-    color: white;
+    display: none;
 }
 
 .fullscreen-mode .iframe-container {
     width: 100%;
     height: 100%;
     border: none;
+}
+
+/* フルスクリーン時のオーバーレイUI */
+.fullscreen-overlay {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 10000;
+}
+
+.fullscreen-mode .fullscreen-overlay {
+    display: block;
+}
+
+.fullscreen-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 12px 16px;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.fs-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.fs-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.fs-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.fs-progress {
+    color: white;
+    font-size: 14px;
+    margin-left: 8px;
+    padding-left: 12px;
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 /* レスポンシブデザイン */
