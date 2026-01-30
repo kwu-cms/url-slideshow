@@ -27,11 +27,15 @@ const elements = {
     importBtn: document.getElementById('import-btn'),
     importFile: document.getElementById('import-file'),
     copyUrlBtn: document.getElementById('copy-url-btn'),
+    clearBtn: document.getElementById('clear-btn'),
     fsStartBtn: document.getElementById('fs-start-btn'),
     fsStopBtn: document.getElementById('fs-stop-btn'),
     fsExitBtn: document.getElementById('fs-exit-btn'),
     fsCurrentIndex: document.getElementById('fs-current-index'),
-    fsTotalUrls: document.getElementById('fs-total-urls')
+    fsTotalUrls: document.getElementById('fs-total-urls'),
+    helpBtn: document.getElementById('help-btn'),
+    helpModal: document.getElementById('help-modal'),
+    helpModalClose: document.getElementById('help-modal-close')
 };
 
 // URLリストの管理
@@ -123,13 +127,15 @@ function renderUrlList() {
 
     elements.urlList.innerHTML = state.urls.map((url, index) => {
         const isActive = index === state.currentIndex && state.isPlaying;
+        const isFirst = index === 0;
+        const isLast = index === state.urls.length - 1;
         return `
             <div class="url-item ${isActive ? 'active' : ''}">
                 <span class="url-text">${url}</span>
                 <div class="url-controls">
-                    <button class="btn btn-small btn-secondary" onclick="moveUrl(${index}, -1)" ${index === 0 ? 'disabled' : ''}>↑</button>
-                    <button class="btn btn-small btn-secondary" onclick="moveUrl(${index}, 1)" ${index === state.urls.length - 1 ? 'disabled' : ''}>↓</button>
-                    <button class="btn btn-small btn-danger" onclick="removeUrl(${index})">削除</button>
+                    <button class="btn btn-small btn-secondary" onclick="moveUrl(${index}, -1)" ${isFirst ? 'style="display:none"' : ''}><i class="fas fa-arrow-up"></i></button>
+                    <button class="btn btn-small btn-secondary" onclick="moveUrl(${index}, 1)" ${isLast ? 'style="display:none"' : ''}><i class="fas fa-arrow-down"></i></button>
+                    <button class="btn btn-small btn-secondary" onclick="removeUrl(${index})"><i class="fas fa-trash"></i></button>
                 </div>
             </div>
         `;
@@ -142,6 +148,21 @@ function updateDisplayInfo() {
     if (elements.fsCurrentIndex && elements.fsTotalUrls) {
         elements.fsCurrentIndex.textContent = state.currentIndex + 1;
         elements.fsTotalUrls.textContent = state.urls.length;
+    }
+}
+
+function updateStatusDisplay() {
+    const statusIndicator = document.getElementById('status-indicator');
+    const statusText = document.getElementById('status-text');
+    
+    if (statusIndicator && statusText) {
+        if (state.isPlaying) {
+            statusIndicator.classList.add('playing');
+            statusText.textContent = '再生中';
+        } else {
+            statusIndicator.classList.remove('playing');
+            statusText.textContent = '停止中';
+        }
     }
 }
 
@@ -186,12 +207,17 @@ function start() {
     state.displayTime = parseInt(elements.displayTime.value) || 5;
     state.isLooping = elements.loopCheckbox.checked;
 
-    elements.startBtn.disabled = true;
+    // ボタンの表示切り替え
+    elements.startBtn.style.display = 'none';
+    elements.stopBtn.style.display = 'inline-flex';
     elements.stopBtn.disabled = false;
     if (elements.fsStartBtn) elements.fsStartBtn.disabled = true;
     if (elements.fsStopBtn) elements.fsStopBtn.disabled = false;
     elements.displayTime.disabled = true;
     elements.loopCheckbox.disabled = true;
+
+    // 状態表示の更新
+    updateStatusDisplay();
 
     // 最初のURLを表示
     if (state.currentIndex >= state.urls.length) {
@@ -215,12 +241,17 @@ function stop() {
         state.timer = null;
     }
 
-    elements.startBtn.disabled = false;
+    // ボタンの表示切り替え
+    elements.startBtn.style.display = 'inline-flex';
+    elements.stopBtn.style.display = 'none';
     elements.stopBtn.disabled = true;
     if (elements.fsStartBtn) elements.fsStartBtn.disabled = false;
     if (elements.fsStopBtn) elements.fsStopBtn.disabled = true;
     elements.displayTime.disabled = false;
     elements.loopCheckbox.disabled = false;
+
+    // 状態表示の更新
+    updateStatusDisplay();
 
     renderUrlList();
 }
@@ -238,10 +269,23 @@ function enterFullscreen() {
     state.isFullscreen = true;
     document.body.classList.add('fullscreen-mode');
     elements.displayArea.classList.add('fullscreen-mode');
+    
+    // フルスクリーン時に自動的に再生開始（URLが設定されている場合）
+    if (state.urls.length > 0 && !state.isPlaying) {
+        setTimeout(() => {
+            start();
+        }, 100);
+    }
+    
     return Promise.resolve();
 }
 
 function exitFullscreen() {
+    // フルスクリーン解除時に自動的に停止
+    if (state.isPlaying) {
+        stop();
+    }
+    
     state.isFullscreen = false;
     document.body.classList.remove('fullscreen-mode');
     elements.displayArea.classList.remove('fullscreen-mode');
@@ -459,17 +503,53 @@ function copyCurrentUrlToClipboard() {
     const fullUrl = `${baseUrl}?${params}`;
     
     navigator.clipboard.writeText(fullUrl).then(() => {
-        // フィードバックを表示（簡単なアラートまたはボタンのテキスト変更）
-        const originalText = elements.copyUrlBtn.textContent;
-        elements.copyUrlBtn.textContent = 'コピーしました！';
+        // フィードバックを表示
+        const originalHTML = elements.copyUrlBtn.innerHTML;
+        elements.copyUrlBtn.innerHTML = 'コピーしました！ <i class="fas fa-check"></i>';
         elements.copyUrlBtn.style.background = '#28a745';
         setTimeout(() => {
-            elements.copyUrlBtn.textContent = originalText;
+            elements.copyUrlBtn.innerHTML = originalHTML;
             elements.copyUrlBtn.style.background = '';
-        }, 2000);
+        }, 3000);
     }).catch(err => {
         alert('クリップボードへのコピーに失敗しました: ' + err.message);
     });
+}
+
+// 設定をクリア（初期状態に戻す）
+function clearSettings() {
+    if (!confirm('すべての設定をクリアして初期状態に戻しますか？')) {
+        return;
+    }
+
+    // 再生を停止
+    if (state.isPlaying) {
+        stop();
+    }
+
+    // フルスクリーンを解除
+    if (state.isFullscreen) {
+        exitFullscreen();
+    }
+
+    // 状態を初期値にリセット
+    state.urls = [];
+    state.currentIndex = 0;
+    state.displayTime = 5;
+    state.isLooping = true;
+
+    // UI要素をリセット
+    elements.displayTime.value = 5;
+    elements.loopCheckbox.checked = true;
+    elements.urlInput.value = '';
+
+    // ローカルストレージをクリア
+    localStorage.removeItem('urlSlideshowData');
+
+    // UIを更新
+    renderUrlList();
+    updateDisplayInfo();
+    updateStatusDisplay();
 }
 
 // ローカルストレージ機能
@@ -553,6 +633,32 @@ elements.stopBtn.addEventListener('click', stop);
 
 elements.fullscreenBtn.addEventListener('click', toggleFullscreen);
 
+// 操作方法モーダル
+if (elements.helpBtn) {
+    elements.helpBtn.addEventListener('click', () => {
+        if (elements.helpModal) {
+            elements.helpModal.classList.add('show');
+        }
+    });
+}
+
+if (elements.helpModalClose) {
+    elements.helpModalClose.addEventListener('click', () => {
+        if (elements.helpModal) {
+            elements.helpModal.classList.remove('show');
+        }
+    });
+}
+
+// モーダル外をクリックで閉じる
+if (elements.helpModal) {
+    elements.helpModal.addEventListener('click', (e) => {
+        if (e.target === elements.helpModal) {
+            elements.helpModal.classList.remove('show');
+        }
+    });
+}
+
 if (elements.fsStartBtn) {
     elements.fsStartBtn.addEventListener('click', start);
 }
@@ -570,6 +676,9 @@ elements.exportBtn.addEventListener('click', exportData);
 elements.importBtn.addEventListener('click', () => {
     elements.importFile.click();
 });
+if (elements.clearBtn) {
+    elements.clearBtn.addEventListener('click', clearSettings);
+}
 
 elements.importFile.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -606,6 +715,7 @@ window.removeUrl = removeUrl;
 loadFromLocalStorage();
 renderUrlList();
 updateDisplayInfo();
+updateStatusDisplay();
 
 // URLパラメータの読み込み（ローカルストレージより優先）
 loadFromUrlParams();

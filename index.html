@@ -23,7 +23,7 @@
                     <label for="url-input">URLを追加（複数行対応）</label>
                     <div class="input-group">
                         <textarea id="url-input" placeholder="https://example.com&#10;https://example2.com" rows="4"></textarea>
-                        <button id="add-url-btn" class="btn btn-primary">追加</button>
+                        <button id="add-url-btn" class="btn btn-primary"><i class="fas fa-plus"></i> 追加</button>
                     </div>
                 </div>
 
@@ -41,9 +41,9 @@
                     </div>
                 </div>
 
-                <!-- URLリスト -->
+                <!-- URLプレイリスト -->
                 <div class="url-list-section">
-                    <h3>URLリスト</h3>
+                    <h3>URLプレイリスト</h3>
                     <div id="url-list" class="url-list">
                         <p class="empty-message">URLがありません</p>
                     </div>
@@ -51,9 +51,12 @@
 
                 <!-- データ管理 -->
                 <div class="data-management">
-                    <button id="copy-url-btn" class="btn btn-secondary">URLをコピー</button>
-                    <button id="export-btn" class="btn btn-secondary">エクスポート</button>
-                    <button id="import-btn" class="btn btn-secondary">インポート</button>
+                    <button id="copy-url-btn" class="btn btn-primary btn-copy-url">再生用のURLをコピー <i class="fas fa-clipboard"></i></button>
+                    <div class="data-management-row">
+                        <button id="export-btn" class="btn btn-secondary"><i class="fas fa-download"></i> エクスポート</button>
+                        <button id="import-btn" class="btn btn-secondary"><i class="fas fa-upload"></i> インポート</button>
+                    </div>
+                    <button id="clear-btn" class="btn btn-secondary btn-clear"><i class="fas fa-trash-alt"></i> 設定をクリア</button>
                     <input type="file" id="import-file" accept=".json" style="display: none;">
                 </div>
             </div>
@@ -62,12 +65,17 @@
             <div class="display-area" id="display-area">
                 <div class="display-controls">
                     <div class="progress-info">
+                        <span class="status-indicator" id="status-indicator">
+                            <i class="fas fa-circle status-dot"></i>
+                        </span>
                         <span id="current-index">0</span> / <span id="total-urls">0</span>
+                        <span class="status-text" id="status-text">停止中</span>
                     </div>
                     <div class="control-buttons">
-                        <button id="start-btn" class="btn btn-success">開始</button>
-                        <button id="stop-btn" class="btn btn-danger" disabled>停止</button>
-                        <button id="fullscreen-btn" class="btn btn-secondary">フルスクリーン</button>
+                        <button id="start-btn" class="btn btn-primary"><i class="fas fa-play"></i> 開始</button>
+                        <button id="stop-btn" class="btn btn-primary" style="display: none;"><i class="fas fa-stop"></i> 停止</button>
+                        <button id="fullscreen-btn" class="btn btn-primary"><i class="fas fa-expand"></i> フルスクリーン</button>
+                        <button id="help-btn" class="btn btn-secondary"><i class="fas fa-question-circle"></i></button>
                     </div>
                 </div>
                 <div class="iframe-container" id="iframe-container">
@@ -90,6 +98,43 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作方法モーダル -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>操作方法</h2>
+                <button class="modal-close" id="help-modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <h3>基本操作</h3>
+                <ul>
+                    <li><strong>URLを追加</strong>: テキストエリアにURLを入力（複数行対応）し、「追加」ボタンをクリック</li>
+                    <li><strong>開始/停止</strong>: スライドショーの開始と停止</li>
+                    <li><strong>フルスクリーン</strong>: ウィンドウ内で全面表示モードに切り替え</li>
+                </ul>
+                
+                <h3>URLプレイリストの操作</h3>
+                <ul>
+                    <li><strong>↑/↓</strong>: URLの順序を変更</li>
+                    <li><strong>削除</strong>: URLを削除</li>
+                </ul>
+                
+                <h3>キーボードショートカット</h3>
+                <ul>
+                    <li><strong>スペースキー</strong>: 開始/停止の切り替え</li>
+                    <li><strong>Ctrl+Enter (Cmd+Enter)</strong>: URL追加</li>
+                </ul>
+                
+                <h3>データ管理</h3>
+                <ul>
+                    <li><strong>再生用のURLをコピー</strong>: 現在の設定をURLパラメータ形式でコピー</li>
+                    <li><strong>エクスポート</strong>: 設定をJSONファイルとして保存</li>
+                    <li><strong>インポート</strong>: JSONファイルから設定を読み込み</li>
+                </ul>
             </div>
         </div>
     </div>
