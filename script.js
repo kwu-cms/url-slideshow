@@ -26,6 +26,7 @@ const elements = {
     exportBtn: document.getElementById('export-btn'),
     importBtn: document.getElementById('import-btn'),
     importFile: document.getElementById('import-file'),
+    copyUrlBtn: document.getElementById('copy-url-btn'),
     fsStartBtn: document.getElementById('fs-start-btn'),
     fsStopBtn: document.getElementById('fs-stop-btn'),
     fsExitBtn: document.getElementById('fs-exit-btn'),
@@ -36,8 +37,7 @@ const elements = {
 // URLリストの管理
 function addUrl(url) {
     if (!url || !url.trim()) {
-        alert('URLを入力してください');
-        return;
+        return false;
     }
 
     // URLの正規化（http://またはhttps://がない場合は追加）
@@ -47,9 +47,37 @@ function addUrl(url) {
     }
 
     state.urls.push(normalizedUrl);
-    saveToLocalStorage();
-    renderUrlList();
-    updateDisplayInfo();
+    return true;
+}
+
+function addUrls(urlsText) {
+    if (!urlsText || !urlsText.trim()) {
+        return 0;
+    }
+
+    // 改行区切りで分割し、空行を除外
+    const urlLines = urlsText.split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+
+    if (urlLines.length === 0) {
+        return 0;
+    }
+
+    let addedCount = 0;
+    urlLines.forEach(url => {
+        if (addUrl(url)) {
+            addedCount++;
+        }
+    });
+
+    if (addedCount > 0) {
+        saveToLocalStorage();
+        renderUrlList();
+        updateDisplayInfo();
+    }
+
+    return addedCount;
 }
 
 function removeUrl(index) {
@@ -207,40 +235,20 @@ function toggleFullscreen() {
 }
 
 function enterFullscreen() {
-    if (elements.displayArea.requestFullscreen) {
-        elements.displayArea.requestFullscreen();
-    } else if (elements.displayArea.webkitRequestFullscreen) {
-        elements.displayArea.webkitRequestFullscreen();
-    } else if (elements.displayArea.mozRequestFullScreen) {
-        elements.displayArea.mozRequestFullScreen();
-    } else if (elements.displayArea.msRequestFullscreen) {
-        elements.displayArea.msRequestFullscreen();
-    }
+    state.isFullscreen = true;
+    document.body.classList.add('fullscreen-mode');
+    elements.displayArea.classList.add('fullscreen-mode');
+    return Promise.resolve();
 }
 
 function exitFullscreen() {
-    if (document.exitFullscreen) {
-        document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-    } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-    }
+    state.isFullscreen = false;
+    document.body.classList.remove('fullscreen-mode');
+    elements.displayArea.classList.remove('fullscreen-mode');
 }
 
 function handleFullscreenChange() {
-    state.isFullscreen = !!(document.fullscreenElement || 
-                            document.webkitFullscreenElement || 
-                            document.mozFullScreenElement || 
-                            document.msFullscreenElement);
-    
-    if (state.isFullscreen) {
-        elements.displayArea.classList.add('fullscreen-mode');
-    } else {
-        elements.displayArea.classList.remove('fullscreen-mode');
-    }
+    // この関数は不要になったが、互換性のため残す
 }
 
 // エクスポート/インポート機能
@@ -300,6 +308,170 @@ function importData(file) {
     reader.readAsText(file);
 }
 
+// URLパラメータの解析
+function getUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    const result = {};
+    
+    // URLリストの取得（カンマ区切りまたは配列形式）
+    const urlsParam = params.get('urls');
+    if (urlsParam) {
+        result.urls = urlsParam.split(',').map(url => {
+            url = url.trim();
+            // 二重エンコードされている場合に対応
+            try {
+                url = decodeURIComponent(url);
+                // さらにエンコードされている可能性がある場合
+                if (url.includes('%')) {
+                    url = decodeURIComponent(url);
+                }
+            } catch (e) {
+                // デコードに失敗した場合はそのまま使用
+            }
+            // URLの正規化
+            if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            return url;
+        }).filter(url => url);
+    }
+    
+    // 表示時間の取得
+    const displayTimeParam = params.get('displayTime') || params.get('time');
+    if (displayTimeParam !== null) {
+        const time = parseInt(displayTimeParam);
+            if (!isNaN(time) && time > 0) {
+                result.displayTime = time;
+            }
+    }
+    
+    // ループ再生の取得
+    const loopParam = params.get('loop') || params.get('looping');
+    if (loopParam !== null) {
+        result.loop = loopParam === 'true' || loopParam === '1';
+    }
+    
+    // フルスクリーンの取得
+    const fullscreenParam = params.get('fullscreen');
+    if (fullscreenParam !== null) {
+        result.fullscreen = fullscreenParam === 'true' || fullscreenParam === '1';
+    }
+    
+    // 再生状態の取得（playing, play, stateパラメータに対応）
+    const playingParam = params.get('playing') || params.get('play') || params.get('state');
+    if (playingParam !== null) {
+        result.playing = playingParam === 'true' || playingParam === '1' || playingParam === 'playing';
+    }
+    
+    return result;
+}
+
+function loadFromUrlParams() {
+    const urlParams = getUrlParams();
+    
+    // URLリストの設定
+    if (urlParams.urls && urlParams.urls.length > 0) {
+        state.urls = urlParams.urls;
+        saveToLocalStorage();
+        renderUrlList();
+        updateDisplayInfo();
+    }
+    
+    // 表示時間の設定
+    if (urlParams.displayTime !== undefined) {
+        state.displayTime = urlParams.displayTime;
+        elements.displayTime.value = urlParams.displayTime;
+        saveToLocalStorage();
+    }
+    
+    // ループ再生の設定
+    if (urlParams.loop !== undefined) {
+        state.isLooping = urlParams.loop;
+        elements.loopCheckbox.checked = urlParams.loop;
+        saveToLocalStorage();
+    }
+    
+    // フルスクリーンと再生の設定
+    const shouldFullscreen = urlParams.fullscreen === true;
+    const shouldPlay = urlParams.playing === true && state.urls.length > 0;
+    
+    if (shouldFullscreen && shouldPlay) {
+        // フルスクリーンと再生の両方が必要な場合
+        // まずDOMの準備を待つ
+        setTimeout(() => {
+            enterFullscreen();
+            // フルスクリーンが完了してから再生を開始
+            setTimeout(() => {
+                start();
+            }, 100);
+        }, 200);
+    } else if (shouldFullscreen) {
+        // フルスクリーンのみ
+        setTimeout(() => {
+            enterFullscreen();
+        }, 200);
+    } else if (shouldPlay) {
+        // 再生のみ
+        setTimeout(() => {
+            start();
+        }, 200);
+    }
+}
+
+// 現在の設定をURLパラメータ形式で取得（フルスクリーン再生用）
+function getFullscreenPlaybackUrlParams() {
+    const params = new URLSearchParams();
+    
+    // URLリスト（必須）
+    if (state.urls.length === 0) {
+        return null;
+    }
+    const encodedUrls = state.urls.map(url => encodeURIComponent(url)).join(',');
+    params.set('urls', encodedUrls);
+    
+    // 表示時間
+    if (state.displayTime !== 5) {
+        params.set('displayTime', state.displayTime.toString());
+    }
+    
+    // ループ再生
+    if (state.isLooping !== true) {
+        params.set('loop', state.isLooping.toString());
+    }
+    
+    // フルスクリーンと再生を常に含める
+    params.set('fullscreen', 'true');
+    params.set('playing', 'true');
+    
+    return params.toString();
+}
+
+// 現在の設定をクリップボードにコピー（フルスクリーン再生用）
+function copyCurrentUrlToClipboard() {
+    const params = getFullscreenPlaybackUrlParams();
+    
+    if (!params) {
+        alert('URLが設定されていません。URLを追加してからコピーしてください。');
+        return;
+    }
+    
+    const baseUrl = window.location.origin + window.location.pathname;
+    const fullUrl = `${baseUrl}?${params}`;
+    
+    navigator.clipboard.writeText(fullUrl).then(() => {
+        // フィードバックを表示（簡単なアラートまたはボタンのテキスト変更）
+        const originalText = elements.copyUrlBtn.textContent;
+        elements.copyUrlBtn.textContent = 'コピーしました！';
+        elements.copyUrlBtn.style.background = '#28a745';
+        setTimeout(() => {
+            elements.copyUrlBtn.textContent = originalText;
+            elements.copyUrlBtn.style.background = '';
+        }, 2000);
+    }).catch(err => {
+        alert('クリップボードへのコピーに失敗しました: ' + err.message);
+    });
+}
+
 // ローカルストレージ機能
 function saveToLocalStorage() {
     const data = {
@@ -334,16 +506,46 @@ function loadFromLocalStorage() {
 
 // イベントリスナーの設定
 elements.addUrlBtn.addEventListener('click', () => {
-    addUrl(elements.urlInput.value);
-    elements.urlInput.value = '';
-    elements.urlInput.focus();
+    const inputValue = elements.urlInput.value;
+    if (!inputValue || !inputValue.trim()) {
+        alert('URLを入力してください');
+        return;
+    }
+    
+    const addedCount = addUrls(inputValue);
+    if (addedCount > 0) {
+        elements.urlInput.value = '';
+        elements.urlInput.focus();
+    } else {
+        alert('有効なURLが見つかりませんでした');
+    }
 });
 
-elements.urlInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        addUrl(elements.urlInput.value);
-        elements.urlInput.value = '';
+elements.urlInput.addEventListener('keydown', (e) => {
+    // Ctrl+EnterまたはCmd+Enterで追加
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        const inputValue = elements.urlInput.value;
+        if (!inputValue || !inputValue.trim()) {
+            return;
+        }
+        
+        const addedCount = addUrls(inputValue);
+        if (addedCount > 0) {
+            elements.urlInput.value = '';
+            elements.urlInput.focus();
+        }
     }
+});
+
+elements.displayTime.addEventListener('change', () => {
+    state.displayTime = parseInt(elements.displayTime.value) || 5;
+    saveToLocalStorage();
+});
+
+elements.loopCheckbox.addEventListener('change', () => {
+    state.isLooping = elements.loopCheckbox.checked;
+    saveToLocalStorage();
 });
 
 elements.startBtn.addEventListener('click', start);
@@ -358,9 +560,12 @@ if (elements.fsStopBtn) {
     elements.fsStopBtn.addEventListener('click', stop);
 }
 if (elements.fsExitBtn) {
-    elements.fsExitBtn.addEventListener('click', exitFullscreen);
+    elements.fsExitBtn.addEventListener('click', () => {
+        exitFullscreen();
+    });
 }
 
+elements.copyUrlBtn.addEventListener('click', copyCurrentUrlToClipboard);
 elements.exportBtn.addEventListener('click', exportData);
 elements.importBtn.addEventListener('click', () => {
     elements.importFile.click();
@@ -374,11 +579,7 @@ elements.importFile.addEventListener('change', (e) => {
     }
 });
 
-// フルスクリーン変更の監視
-document.addEventListener('fullscreenchange', handleFullscreenChange);
-document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+// フルスクリーン変更の監視（不要になったが互換性のため残す）
 
 // ESCキーでフルスクリーン解除（ブラウザのデフォルト動作を利用）
 
@@ -405,3 +606,6 @@ window.removeUrl = removeUrl;
 loadFromLocalStorage();
 renderUrlList();
 updateDisplayInfo();
+
+// URLパラメータの読み込み（ローカルストレージより優先）
+loadFromUrlParams();

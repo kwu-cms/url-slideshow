@@ -20,9 +20,9 @@
                 
                 <!-- URL入力フォーム -->
                 <div class="url-input-section">
-                    <label for="url-input">URLを追加</label>
+                    <label for="url-input">URLを追加（複数行対応）</label>
                     <div class="input-group">
-                        <input type="url" id="url-input" placeholder="https://example.com">
+                        <textarea id="url-input" placeholder="https://example.com&#10;https://example2.com" rows="4"></textarea>
                         <button id="add-url-btn" class="btn btn-primary">追加</button>
                     </div>
                 </div>
@@ -51,6 +51,7 @@
 
                 <!-- データ管理 -->
                 <div class="data-management">
+                    <button id="copy-url-btn" class="btn btn-secondary">URLをコピー</button>
                     <button id="export-btn" class="btn btn-secondary">エクスポート</button>
                     <button id="import-btn" class="btn btn-secondary">インポート</button>
                     <input type="file" id="import-file" accept=".json" style="display: none;">
