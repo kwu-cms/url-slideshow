@@ -2,6 +2,10 @@
 
 URLのリストを順番に自動表示するWebアプリケーションです。
 
+## デモ
+
+**GitHub Pages**: [https://kwu-cms.github.io/url-slideshow/](https://kwu-cms.github.io/url-slideshow/)
+
 ## 機能
 
 - **URL管理**: URLの追加（複数行対応）、削除、順序変更
@@ -122,6 +126,18 @@ index.html?urls=https://example.com,https://example2.com&displayTime=10&loop=tru
 - そのようなサイトは、新しいタブで開くか、直接アクセスしてください
 - ローカルストレージのデータは、ブラウザの設定によってクリアされる場合があります
 - URLパラメータで設定を読み込む場合、ローカルストレージの設定より優先されます
+
+## GitHub Pagesでのデプロイ
+
+このプロジェクトはGitHub Pagesでホスティングできます。
+
+1. リポジトリの設定（Settings）に移動
+2. 「Pages」セクションを開く
+3. 「Source」で「Deploy from a branch」を選択
+4. 「Branch」で「main」を選択し、「/ (root)」を選択
+5. 「Save」をクリック
+
+数分後、`https://kwu-cms.github.io/url-slideshow/` でアクセスできるようになります。
 
 ## ライセンス
 
