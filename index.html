@@ -4,14 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URLスライドショー</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Bootstrap Header -->
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">URLスライドショー <label class="edit-mode-label">編集モード</label></span>
+        </div>
+    </nav>
+
     <div class="container">
-        <header>
-            <h1>URLスライドショー</h1>
-        </header>
 
         <div class="main-content">
             <!-- 設定パネル -->
@@ -20,7 +28,8 @@
                 
                 <!-- URL入力フォーム -->
                 <div class="url-input-section">
-                    <label for="url-input">URLを追加（複数行対応）</label>
+                    <h3 class="section-heading">URLを追加</h3>
+                    <label for="url-input">複数行対応</label>
                     <div class="input-group">
                         <textarea id="url-input" placeholder="https://example.com&#10;https://example2.com" rows="4"></textarea>
                         <button id="add-url-btn" class="btn btn-primary"><i class="fas fa-plus"></i> 追加</button>
@@ -43,7 +52,7 @@
 
                 <!-- URLプレイリスト -->
                 <div class="url-list-section">
-                    <h3>URLプレイリスト</h3>
+                    <h3 class="section-heading">URLプレイリスト</h3>
                     <div id="url-list" class="url-list">
                         <p class="empty-message">URLがありません</p>
                     </div>
@@ -64,6 +73,7 @@
             <!-- 表示エリア -->
             <div class="display-area" id="display-area">
                 <div class="display-controls">
+                    <h3>プレビュー</h3>
                     <div class="progress-info">
                         <span class="status-indicator" id="status-indicator">
                             <i class="fas fa-circle status-dot"></i>
@@ -75,7 +85,7 @@
                         <button id="start-btn" class="btn btn-primary"><i class="fas fa-play"></i> 開始</button>
                         <button id="stop-btn" class="btn btn-primary" style="display: none;"><i class="fas fa-stop"></i> 停止</button>
                         <button id="fullscreen-btn" class="btn btn-primary"><i class="fas fa-expand"></i> フルスクリーン</button>
-                        <button id="help-btn" class="btn btn-secondary"><i class="fas fa-question-circle"></i></button>
+                        <button id="help-btn" class="btn btn-secondary"><i class="fas fa-question-circle"></i> 操作方法について</button>
                     </div>
                 </div>
                 <div class="iframe-container" id="iframe-container">
@@ -110,35 +120,56 @@
                 <button class="modal-close" id="help-modal-close"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
-                <h3>基本操作</h3>
+                <h3>操作手順</h3>
+                <ol class="steps-list">
+                    <li>「URLを追加」欄にURLを入力（複数行対応）し、「追加」ボタンをクリックしてURLを追加します</li>
+                    <li>表示時間とループ再生の設定を行います</li>
+                    <li>URLプレイリストでURLの順序を調整したり、不要なURLを削除します</li>
+                    <li>「開始」ボタンをクリックしてスライドショーを開始します</li>
+                    <li>必要に応じて「フルスクリーン」ボタンで全面表示モードに切り替えます</li>
+                    <li>「再生用のURLをコピー」ボタンをクリックしてURLをコピーし共有することで、他の環境でもスライドショーを表示できます</li>
+                </ol>
+                
+                <h3>操作方法</h3>
+                <h4>URLの追加</h4>
                 <ul>
-                    <li><strong>URLを追加</strong>: テキストエリアにURLを入力（複数行対応）し、「追加」ボタンをクリック</li>
-                    <li><strong>開始/停止</strong>: スライドショーの開始と停止</li>
-                    <li><strong>フルスクリーン</strong>: ウィンドウ内で全面表示モードに切り替え</li>
+                    <li>テキストエリアにURLを入力（複数行対応）し、「追加」ボタンをクリック、または<strong>Ctrl+Enter</strong>（Macでは<strong>Cmd+Enter</strong>）を押します</li>
+                    <li><code>http://</code>または<code>https://</code>がない場合は自動的に<code>https://</code>が追加されます</li>
                 </ul>
                 
-                <h3>URLプレイリストの操作</h3>
+                <h4>URLプレイリストの操作</h4>
                 <ul>
                     <li><strong>↑/↓</strong>: URLの順序を変更</li>
-                    <li><strong>削除</strong>: URLを削除</li>
+                    <li><strong>削除</strong>: URLを削除（確認ダイアログが表示されます）</li>
+                    <li>再生中は現在表示中のURLがハイライト表示されます</li>
                 </ul>
                 
-                <h3>キーボードショートカット</h3>
+                <h4>スライドショーの制御</h4>
                 <ul>
-                    <li><strong>スペースキー</strong>: 開始/停止の切り替え</li>
-                    <li><strong>Ctrl+Enter (Cmd+Enter)</strong>: URL追加</li>
+                    <li><strong>開始</strong>: スライドショーを開始します</li>
+                    <li><strong>停止</strong>: スライドショーを停止します</li>
+                    <li><strong>フルスクリーン</strong>: ウィンドウ内で全面表示モードに切り替えます（フルスクリーン時は自動的に再生が開始されます）</li>
                 </ul>
                 
-                <h3>データ管理</h3>
+                <h4>データ管理</h4>
                 <ul>
-                    <li><strong>再生用のURLをコピー</strong>: 現在の設定をURLパラメータ形式でコピー</li>
-                    <li><strong>エクスポート</strong>: 設定をJSONファイルとして保存</li>
-                    <li><strong>インポート</strong>: JSONファイルから設定を読み込み</li>
+                    <li><strong>再生用のURLをコピー</strong>: 現在の設定をURLパラメータ形式でクリップボードにコピーします</li>
+                    <li><strong>エクスポート</strong>: 設定をJSONファイルとして保存します</li>
+                    <li><strong>インポート</strong>: JSONファイルから設定を読み込みます</li>
+                    <li><strong>設定をクリア</strong>: すべての設定を初期状態に戻します</li>
                 </ul>
             </div>
         </div>
     </div>
 
+    <!-- Bootstrap Footer -->
+    <footer class="bg-light text-muted text-center py-3 mt-4">
+        <div class="container">
+            <small>甲南女子大学文学部メディア表現学科</small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
