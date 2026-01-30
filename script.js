@@ -6,7 +6,9 @@ const CONSTANTS = {
     DEFAULT_DISPLAY_TIME: 5,
     STORAGE_KEY: 'urlSlideshowData',
     URL_PREFIX: 'https://',
-    EMPTY_MESSAGE: 'URLを追加してください'
+    EMPTY_MESSAGE: 'URLを追加してください',
+    MOUSE_INACTIVITY_RESUME_DELAY: 10000, // マウス操作検知後の再開待機時間（ミリ秒、デフォルト10秒）
+    NOTIFICATION_DISPLAY_TIME: 5000 // 通知メッセージの表示時間（ミリ秒）
 };
 
 const SELECTORS = {
@@ -26,7 +28,9 @@ const state = {
     isPlaying: false,
     timer: null,
     isFullscreen: false,
-    uiHideTimer: null
+    uiHideTimer: null,
+    isPausedByMouse: false, // マウス操作による一時停止状態
+    resumeTimer: null // 再開タイマー
 };
 
 // ============================================================================
@@ -335,14 +339,15 @@ function start() {
     showUrl(state.currentIndex);
 
     // タイマーを開始
-    state.timer = setInterval(() => {
-        nextUrl();
-    }, state.displayTime * 1000);
+    startSlideTimer();
 
     // フルスクリーン中で再生開始した場合、UI非表示タイマーを開始
     if (state.isFullscreen) {
         startUIHideTimer();
     }
+
+    // マウス操作検知のイベントリスナーを追加
+    setupMouseActivityDetection();
 
     renderUrlList();
 }
@@ -361,6 +366,15 @@ function stop() {
 
     // UI非表示タイマーをクリア
     clearUIHideTimer();
+
+    // 再開タイマーをクリア
+    clearResumeTimer();
+
+    // マウス操作検知のイベントリスナーを削除
+    removeMouseActivityDetection();
+
+    // 一時停止状態をリセット
+    state.isPausedByMouse = false;
 
     // フルスクリーン中の場合、UIを表示状態に戻す
     if (state.isFullscreen) {
@@ -383,13 +397,179 @@ function stop() {
 function updatePlaybackButtons(isPlaying) {
     elements.startBtn.style.display = isPlaying ? 'none' : 'inline-flex';
     elements.stopBtn.style.display = isPlaying ? 'inline-flex' : 'none';
+    
+    // ボタンの有効/無効を設定
+    elements.startBtn.disabled = isPlaying && !state.isPausedByMouse;
     elements.stopBtn.disabled = !isPlaying;
     
-    if (elements.fsStartBtn) elements.fsStartBtn.disabled = isPlaying;
+    // 一時停止中でも再生ボタンを有効にする（フルスクリーン）
+    if (elements.fsStartBtn) {
+        elements.fsStartBtn.disabled = isPlaying && !state.isPausedByMouse;
+    }
     if (elements.fsStopBtn) elements.fsStopBtn.disabled = !isPlaying;
     
     elements.displayTime.disabled = isPlaying;
     elements.loopCheckbox.disabled = isPlaying;
+}
+
+// ============================================================================
+// スライドタイマー管理
+// ============================================================================
+
+/**
+ * スライドタイマーを開始
+ */
+function startSlideTimer() {
+    // 既存のタイマーをクリア
+    if (state.timer) {
+        clearInterval(state.timer);
+    }
+    
+    state.timer = setInterval(() => {
+        if (!state.isPausedByMouse) {
+            nextUrl();
+        }
+    }, state.displayTime * 1000);
+}
+
+/**
+ * スライドタイマーを一時停止
+ */
+function pauseSlideTimer() {
+    if (state.timer) {
+        clearInterval(state.timer);
+        state.timer = null;
+    }
+}
+
+/**
+ * スライドタイマーを再開
+ */
+function resumeSlideTimer() {
+    if (!state.isPlaying || state.isPausedByMouse) {
+        return;
+    }
+    startSlideTimer();
+}
+
+// ============================================================================
+// マウス操作検知による一時停止/再開機能
+// ============================================================================
+
+/**
+ * マウス操作検知のイベントリスナーを設定
+ */
+function setupMouseActivityDetection() {
+    document.addEventListener('mousemove', handleMouseActivity);
+    document.addEventListener('mousedown', handleMouseActivity);
+    document.addEventListener('mouseup', handleMouseActivity);
+}
+
+/**
+ * マウス操作検知のイベントリスナーを削除
+ */
+function removeMouseActivityDetection() {
+    document.removeEventListener('mousemove', handleMouseActivity);
+    document.removeEventListener('mousedown', handleMouseActivity);
+    document.removeEventListener('mouseup', handleMouseActivity);
+}
+
+/**
+ * マウス操作を検知したときのハンドラ
+ */
+function handleMouseActivity() {
+    // 再生中でない場合は何もしない
+    if (!state.isPlaying) {
+        return;
+    }
+
+    // 既に一時停止していない場合、一時停止する
+    if (!state.isPausedByMouse) {
+        state.isPausedByMouse = true;
+        pauseSlideTimer();
+        showNotification('スライドショーを一時停止しました');
+        // ボタンの状態を更新（再生ボタンを有効にする）
+        updatePlaybackButtons(true);
+    }
+
+    // 再開タイマーをリセット
+    clearResumeTimer();
+    
+    // 一定時間後に再開するタイマーを設定
+    state.resumeTimer = setTimeout(() => {
+        if (state.isPausedByMouse && state.isPlaying) {
+            resumeFromPause();
+        }
+    }, CONSTANTS.MOUSE_INACTIVITY_RESUME_DELAY);
+}
+
+/**
+ * 再開タイマーをクリア
+ */
+function clearResumeTimer() {
+    if (state.resumeTimer) {
+        clearTimeout(state.resumeTimer);
+        state.resumeTimer = null;
+    }
+}
+
+/**
+ * 一時停止から即座に再開
+ */
+function resumeFromPause() {
+    if (!state.isPausedByMouse || !state.isPlaying) {
+        return;
+    }
+    
+    state.isPausedByMouse = false;
+    clearResumeTimer();
+    resumeSlideTimer();
+    showNotification('スライドショーを再開しました');
+    // ボタンの状態を更新（再生ボタンを無効にする）
+    updatePlaybackButtons(true);
+}
+
+// ============================================================================
+// 通知メッセージ機能
+// ============================================================================
+
+/**
+ * 通知メッセージを表示
+ */
+function showNotification(message) {
+    // フルスクリーンモードでない場合は表示しない
+    if (!state.isFullscreen) {
+        return;
+    }
+
+    // 既存の通知を削除
+    const existingNotification = document.querySelector('.fs-notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+
+    // 通知要素を作成
+    const notification = document.createElement('div');
+    notification.className = 'fs-notification';
+    notification.textContent = message;
+    
+    // bodyに直接追加（画面の左側に独立して表示）
+    document.body.appendChild(notification);
+
+    // アニメーションで表示
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+
+    // 一定時間後に削除
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 300); // フェードアウトアニメーションの時間
+    }, CONSTANTS.NOTIFICATION_DISPLAY_TIME);
 }
 
 // ============================================================================
@@ -897,7 +1077,14 @@ function initializeEventListeners() {
 
     // フルスクリーンコントロール
     if (elements.fsStartBtn) {
-        elements.fsStartBtn.addEventListener('click', start);
+        elements.fsStartBtn.addEventListener('click', () => {
+            // 一時停止中の場合は即座に再開、そうでない場合は通常の開始
+            if (state.isPausedByMouse && state.isPlaying) {
+                resumeFromPause();
+            } else {
+                start();
+            }
+        });
     }
     if (elements.fsStopBtn) {
         elements.fsStopBtn.addEventListener('click', stop);
