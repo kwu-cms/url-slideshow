@@ -94,18 +94,30 @@
                 <!-- フルスクリーン時のオーバーレイUI -->
                 <div class="fullscreen-overlay" id="fullscreen-overlay">
                     <div class="fullscreen-controls">
+                        <button id="fs-first-btn" class="fs-btn" title="最初へ">
+                            <i class="fas fa-fast-backward"></i>
+                        </button>
+                        <button id="fs-prev-btn" class="fs-btn" title="前へ">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
                         <button id="fs-start-btn" class="fs-btn" title="開始">
                             <i class="fas fa-play"></i>
                         </button>
                         <button id="fs-stop-btn" class="fs-btn" disabled title="停止">
                             <i class="fas fa-stop"></i>
                         </button>
-                        <button id="fs-exit-btn" class="fs-btn" title="フルスクリーン解除">
-                            <i class="fas fa-times"></i>
+                        <button id="fs-next-btn" class="fs-btn" title="次へ">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                        <button id="fs-last-btn" class="fs-btn" title="最後へ">
+                            <i class="fas fa-fast-forward"></i>
                         </button>
                         <div class="fs-progress">
                             <span id="fs-current-index">0</span> / <span id="fs-total-urls">0</span>
                         </div>
+                        <button id="fs-exit-btn" class="fs-btn" title="フルスクリーン解除">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 </div>
             </div>

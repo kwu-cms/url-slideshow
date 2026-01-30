@@ -479,9 +479,11 @@ body.fullscreen-mode .fullscreen-overlay,
     align-items: center;
     gap: 10px;
     background: rgba(0, 0, 0, 0.7);
-    padding: 12px 16px;
+    padding: 10px 16px;
     border-radius: 8px;
     backdrop-filter: blur(10px);
+    height: 52px;
+    box-sizing: border-box;
 }
 
 .fs-btn {
@@ -510,6 +512,10 @@ body.fullscreen-mode .fullscreen-overlay,
     margin-left: 8px;
     padding-left: 12px;
     border-left: 1px solid rgba(255, 255, 255, 0.3);
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    height: 100%;
 }
 
 /* 通知メッセージ */
@@ -519,9 +525,10 @@ body.fullscreen-mode .fullscreen-overlay,
     bottom: 20px;
     background: rgba(0, 0, 0, 0.8);
     color: white;
-    padding: 12px 20px;
+    padding: 10px 20px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 16px;
+    line-height: 1.4;
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
@@ -530,6 +537,10 @@ body.fullscreen-mode .fullscreen-overlay,
     max-width: 300px;
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    height: 52px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
 }
 
 .fs-notification.show {

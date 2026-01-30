@@ -54,8 +54,12 @@ const elements = {
     importFile: document.getElementById('import-file'),
     copyUrlBtn: document.getElementById('copy-url-btn'),
     clearBtn: document.getElementById('clear-btn'),
+    fsFirstBtn: document.getElementById('fs-first-btn'),
+    fsPrevBtn: document.getElementById('fs-prev-btn'),
     fsStartBtn: document.getElementById('fs-start-btn'),
     fsStopBtn: document.getElementById('fs-stop-btn'),
+    fsNextBtn: document.getElementById('fs-next-btn'),
+    fsLastBtn: document.getElementById('fs-last-btn'),
     fsExitBtn: document.getElementById('fs-exit-btn'),
     fsCurrentIndex: document.getElementById('fs-current-index'),
     fsTotalUrls: document.getElementById('fs-total-urls'),
@@ -98,6 +102,7 @@ function updateUI() {
     updateDisplayInfo();
     updateStatusDisplay();
     updateFullscreenButtonState();
+    updateNavigationButtons();
 }
 
 // ============================================================================
@@ -143,6 +148,7 @@ function addUrls(urlsText) {
     if (addedCount > 0) {
         saveToLocalStorage();
         updateUI();
+        updateNavigationButtons();
     }
 
     return addedCount;
@@ -247,6 +253,29 @@ function updateDisplayInfo() {
     }
     
     updateFullscreenButtonState();
+    updateNavigationButtons();
+}
+
+/**
+ * ナビゲーションボタンの状態を更新
+ */
+function updateNavigationButtons() {
+    const hasUrls = state.urls.length > 0;
+    const isFirst = state.currentIndex === 0;
+    const isLast = state.currentIndex === state.urls.length - 1;
+    
+    if (elements.fsFirstBtn) {
+        elements.fsFirstBtn.disabled = !hasUrls || isFirst;
+    }
+    if (elements.fsPrevBtn) {
+        elements.fsPrevBtn.disabled = !hasUrls || (isFirst && !state.isLooping);
+    }
+    if (elements.fsNextBtn) {
+        elements.fsNextBtn.disabled = !hasUrls || (isLast && !state.isLooping);
+    }
+    if (elements.fsLastBtn) {
+        elements.fsLastBtn.disabled = !hasUrls || isLast;
+    }
 }
 
 /**
@@ -290,6 +319,12 @@ function showUrl(index) {
 
     state.currentIndex = index;
     elements.contentFrame.src = state.urls[index];
+    
+    // 一時停止中の場合、タイマーをリセット
+    if (state.isPausedByMouse && state.timer) {
+        pauseSlideTimer();
+    }
+    
     updateDisplayInfo();
     renderUrlList();
 }
@@ -313,6 +348,70 @@ function nextUrl() {
         }
     }
 
+    showUrl(state.currentIndex);
+}
+
+/**
+ * 最初のURLに移動
+ */
+function goToFirst() {
+    if (state.urls.length === 0) {
+        return;
+    }
+    showUrl(0);
+}
+
+/**
+ * 最後のURLに移動
+ */
+function goToLast() {
+    if (state.urls.length === 0) {
+        return;
+    }
+    showUrl(state.urls.length - 1);
+}
+
+/**
+ * 前のURLに移動（-1）
+ */
+function goToPrev() {
+    if (state.urls.length === 0) {
+        return;
+    }
+    
+    state.currentIndex--;
+    
+    if (state.currentIndex < 0) {
+        if (state.isLooping) {
+            state.currentIndex = state.urls.length - 1;
+        } else {
+            state.currentIndex = 0;
+            return;
+        }
+    }
+    
+    showUrl(state.currentIndex);
+}
+
+/**
+ * 次のURLに移動（+1）
+ */
+function goToNext() {
+    if (state.urls.length === 0) {
+        return;
+    }
+    
+    state.currentIndex++;
+    
+    if (state.currentIndex >= state.urls.length) {
+        if (state.isLooping) {
+            state.currentIndex = 0;
+        } else {
+            state.currentIndex = state.urls.length - 1;
+            return;
+        }
+    }
+    
     showUrl(state.currentIndex);
 }
 
@@ -1076,6 +1175,12 @@ function initializeEventListeners() {
     }
 
     // フルスクリーンコントロール
+    if (elements.fsFirstBtn) {
+        elements.fsFirstBtn.addEventListener('click', goToFirst);
+    }
+    if (elements.fsPrevBtn) {
+        elements.fsPrevBtn.addEventListener('click', goToPrev);
+    }
     if (elements.fsStartBtn) {
         elements.fsStartBtn.addEventListener('click', () => {
             // 一時停止中の場合は即座に再開、そうでない場合は通常の開始
@@ -1088,6 +1193,12 @@ function initializeEventListeners() {
     }
     if (elements.fsStopBtn) {
         elements.fsStopBtn.addEventListener('click', stop);
+    }
+    if (elements.fsNextBtn) {
+        elements.fsNextBtn.addEventListener('click', goToNext);
+    }
+    if (elements.fsLastBtn) {
+        elements.fsLastBtn.addEventListener('click', goToLast);
     }
     if (elements.fsExitBtn) {
         elements.fsExitBtn.addEventListener('click', exitFullscreen);
